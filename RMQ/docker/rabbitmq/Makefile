@@ -1,4 +1,4 @@
-IMAGE_NAME = jtac/rabbitmq
+IMAGE_NAME = vizoro/rabbitmq
 IMAGE_TAG=$(shell git rev-parse --short HEAD)
 TAG := $(IMAGE_TAG)
 REGISTRY_URL = registry.open-sys.org

@@ -23,16 +23,14 @@ pipeline {
             steps {
                 echo "==================== start building image ======================="
                 dir ('RMQ/docker/rabbitmq') {
-                    sh 'docker build -t az223/az_repo2:latest . '
+                    sh 'docker build -t az223/vizoro-rmq:latest . '
                 }
             }
         }
         stage("docker push") {
             steps {
                 echo "==================== start pushing image  ======================="
-                sh '''
-                docker push az223/az_repo2:latest
-                '''
+                sh 'docker push az223/vizoro-rmq:latest'
             }
         }
     }

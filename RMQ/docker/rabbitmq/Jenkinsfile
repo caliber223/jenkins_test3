@@ -22,8 +22,9 @@ pipeline {
         stage("Build Docker image") {
             steps {
                 echo "==================== start building image ======================="
-                dir (RMQ/docker/rabbitmq)
-                sh 'docker build -t az223/az_repo2:latest . '
+                dir ('RMQ/docker/rabbitmq') {
+                    sh 'docker build -t az223/az_repo2:latest . '
+                }
             }
         }
         stage("docker push") {

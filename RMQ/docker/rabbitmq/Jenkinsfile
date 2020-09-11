@@ -1,37 +1,48 @@
-#!groovy
-// Build RMQ image
-properties([disableConcurrentBuilds()])
+#!/usr/bin/env groovy
 
-pipeline {
-    agent {
-        label 'master'
-    }
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
-        timestamps()
-    }
-    stages {
-        stage("docker login") {
-            steps {
-                echo "====================     docker login     ======================="
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                    sh "docker login -u $USERNAME -p $PASSWORD"
-                }
-            }
+boolean success = true
+def dockerRegistry = "registry.open-sys.org"
+
+properties([
+    disableConcurrentBuilds()
+])
+
+try {
+    node('docker') {
+        stage('Checkout') {
+            checkout([
+                $class: 'GitSCM',
+                branches: scm.branches,
+                extensions: scm.extensions + [
+                    [$class: 'CleanBeforeCheckout'],
+                    [$class: 'PathRestriction', excludedRegions: '', includedRegions: '^RMQ/docker/rabbitmq/.*$']
+                ],
+                submoduleCfg: [],
+                userRemoteConfigs: [
+                    [credentialsId: 'jenkins-azot-with-key', url: 'git@github.com:caliber223/jenkins_test3.git']
+                ]
+            ])
+
+            shortCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim().take(7)
+            currentBuild.description = "${shortCommit}"
+            sh 'env | sort'
         }
-        stage("Build Docker image") {
-            steps {
-                echo "==================== start building image ======================="
-                dir ('RMQ/docker/rabbitmq') {
-                    sh 'docker build -t az223/vizoro-rmq:latest . '
-                }
+
+        dir('RMQdocker/rabbitmq') {
+            stage('Build') {
+                sh 'make docker'
             }
-        }
-        stage("docker push") {
-            steps {
-                echo "==================== start pushing image  ======================="
-                sh 'docker push az223/vizoro-rmq:latest'
+
+            stage('Push') {
+                sh 'make push'
+                sh 'make push TAG=latest'
             }
-        }
-    }
+        } // end 'dir'
+
+    } // end node 'docker'
+} catch (e) {
+    echo e.toString()
+    sucess = false
+    currentBuild.result = 'FAILURE'
+} finally {
 }

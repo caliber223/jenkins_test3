@@ -1,5 +1,5 @@
 #!groovy
-// Build repeat_check
+// Build RMQ image
 properties([disableConcurrentBuilds()])
 
 pipeline {
@@ -11,9 +11,26 @@ pipeline {
         timestamps()
     }
     stages {
+        stage("docker login") {
+            steps {
+                echo "====================     docker login     ======================="
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login -u $USERNAME -p $PASSWORD"
+                }
+            }
+        }
         stage("Build Docker image") {
             steps {
-                sh 'ls -l'
+                echo "==================== start building image ======================="
+                dir ('RMQ/docker/rabbitmq') {
+                    sh 'docker build -t az223/vizoro-rmq:latest . '
+                }
+            }
+        }
+        stage("docker push") {
+            steps {
+                echo "==================== start pushing image  ======================="
+                sh 'docker push az223/vizoro-rmq:latest'
             }
         }
     }

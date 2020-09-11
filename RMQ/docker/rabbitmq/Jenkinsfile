@@ -8,7 +8,7 @@ properties([
 ])
 
 try {
-    node('docker') {
+    node {
         stage('Checkout') {
             checkout([
                 $class: 'GitSCM',

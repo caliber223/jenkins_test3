@@ -9,7 +9,7 @@ properties([
 
 try {
     node {
-        stage('Checkout') {
+        /*stage('Checkout') {
             checkout([
                 $class: 'GitSCM',
                 branches: scm.branches,
@@ -24,6 +24,15 @@ try {
             ])
 
             sh 'env | sort'
+        }*/
+
+        stage("docker login") {
+            steps {
+                echo "====================     docker login     ======================="
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login -u $USERNAME -p $PASSWORD"
+                }
+            }
         }
 
         dir('RMQ/docker/rabbitmq') {

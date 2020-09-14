@@ -23,8 +23,6 @@ try {
                 ]
             ])
 
-            shortCommit = sh(returnStdout: true, script: 'git rev-parse HEAD').trim().take(7)
-            currentBuild.description = "${shortCommit}"
             sh 'env | sort'
         }
 

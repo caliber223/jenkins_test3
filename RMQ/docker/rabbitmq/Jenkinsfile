@@ -7,8 +7,8 @@ properties([
     disableConcurrentBuilds()
 ])
 
-try {
-    node {
+
+    pipeline {
         /*stage('Checkout') {
             checkout([
                 $class: 'GitSCM',
@@ -25,6 +25,12 @@ try {
 
             sh 'env | sort'
         }*/
+        agent {
+            label 'master'
+        }
+        options {
+            timestamps()
+        }
         stages {
             stage('docker login') {
                 steps {
@@ -34,23 +40,23 @@ try {
                     }
                 }
             } 
-        }
 
-        dir('RMQ/docker/rabbitmq') {
             stage('Build') {
-                sh 'make docker'
+                steps {
+                    echo "==================== start building image ======================="
+                    dir('RMQ/docker/rabbitmq') {
+                        sh 'make docker'
+                    }
+                }
             }
 
             stage('Push') {
-                sh 'make push'
-                sh 'make push TAG=latest'
+                steps {
+                    echo "==================== start pushing image  ======================="
+                    sh 'make push'
+                    sh 'make push TAG=latest'
+                }
             }
-        } // end 'dir'
+        } 
 
-    } // end node 'docker'
-} catch (e) {
-    echo e.toString()
-    sucess = false
-    currentBuild.result = 'FAILURE'
-} finally {
-}
+    } // end node 

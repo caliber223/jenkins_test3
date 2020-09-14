@@ -19,7 +19,7 @@ try {
                 ],
                 submoduleCfg: [],
                 userRemoteConfigs: [
-                    [credentialsId: 'jenkins-az-test', url: 'git@github.com:caliber223/jenkins_test3.git']
+                    [credentialsId: 'jenkins-azotov', url: 'git@github.com:caliber223/jenkins_test3.git']
                 ]
             ])
 

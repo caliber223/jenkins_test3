@@ -44,7 +44,7 @@ properties([
                         ],
                         submoduleCfg: [],
                         userRemoteConfigs: [
-                            [credentialsId: 'docker-registry-az', url: 'git@github.com:caliber223/jenkins_test3.git']
+                            [credentialsId: 'dockerhub-az223', url: 'git@github.com:caliber223/jenkins_test3.git']
                         ]
                     ])
                 }

@@ -25,6 +25,10 @@ properties([
 
             sh 'env | sort'
         }*/
+        environment {
+            registry = "registry.open-sys.org/vizoro/rabbitmq"
+            registryCredential = 'dockerhub'
+        }
         agent {
             label 'master'
         }
@@ -35,7 +39,7 @@ properties([
             stage('docker login') {
                 steps {
                     echo "====================     docker login     ======================="
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    withCredentials([usernamePassword(credentialsId: 'jenkins-open-sys-with-key', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh "docker login -u $USERNAME -p $PASSWORD"
                     }
                 }

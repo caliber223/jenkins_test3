@@ -33,14 +33,32 @@ properties([
             timestamps()
         }
         stages {
-            stage('docker login') {
+            stage('Checkout') {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: scm.branches,
+                    extensions: scm.extensions + [
+                        [$class: 'CleanBeforeCheckout'],
+                        [$class: 'PathRestriction', excludedRegions: '', includedRegions: '^RMQ/docker/rabbitmq/.*$']
+                    ],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [
+                        [credentialsId: 'docker-registry-az', url: 'git@github.com:caliber223/jenkins_test3.git']
+                    ]
+                ])
+
+                sh 'env | sort'
+            }
+
+
+            /*stage('docker login') {
                 steps {
                     echo "====================     docker login     ======================="
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh "docker login -u $USERNAME -p $PASSWORD"
                     }
                 }
-            } 
+            } */
 
             stage('Build') {
                 steps {
@@ -62,4 +80,4 @@ properties([
             }
         } 
 
-    } // end node 
+    } 

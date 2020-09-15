@@ -53,8 +53,10 @@ properties([
             stage('Push') {
                 steps {
                     echo "==================== start pushing image  ======================="
-                    sh 'make push'
-                    sh 'make push TAG=latest'
+                    dir('RMQ/docker/rabbitmq') {
+                        sh 'make push'
+                        sh 'make push TAG=latest'
+                    }
                 }
             }
         } 

@@ -34,20 +34,20 @@ properties([
         }
         stages {
             stage('Checkout') {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: scm.branches,
-                    extensions: scm.extensions + [
-                        [$class: 'CleanBeforeCheckout'],
-                        [$class: 'PathRestriction', excludedRegions: '', includedRegions: '^RMQ/docker/rabbitmq/.*$']
-                    ],
-                    submoduleCfg: [],
-                    userRemoteConfigs: [
-                        [credentialsId: 'docker-registry-az', url: 'git@github.com:caliber223/jenkins_test3.git']
-                    ]
-                ])
-
-                sh 'env | sort'
+                steps {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: scm.branches,
+                        extensions: scm.extensions + [
+                            [$class: 'CleanBeforeCheckout'],
+                            [$class: 'PathRestriction', excludedRegions: '', includedRegions: '^RMQ/docker/rabbitmq/.*$']
+                        ],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [
+                            [credentialsId: 'docker-registry-az', url: 'git@github.com:caliber223/jenkins_test3.git']
+                        ]
+                    ])
+                }
             }
 
 

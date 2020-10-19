@@ -1,83 +1,37 @@
-#!/usr/bin/env groovy
+#!groovy
+// Build RMQ image
+properties([disableConcurrentBuilds()])
 
-boolean success = true
-def dockerRegistry = "registry.open-sys.org"
-
-properties([
-    disableConcurrentBuilds()
-])
-
-
-    pipeline {
-        /*stage('Checkout') {
-            checkout([
-                $class: 'GitSCM',
-                branches: scm.branches,
-                extensions: scm.extensions + [
-                    [$class: 'CleanBeforeCheckout'],
-                    [$class: 'PathRestriction', excludedRegions: '', includedRegions: '^RMQ/docker/rabbitmq/.*$']
-                ],
-                submoduleCfg: [],
-                userRemoteConfigs: [
-                    [credentialsId: 'jenkins-azotov', url: 'git@github.com:caliber223/jenkins_test3.git']
-                ]
-            ])
-
-            sh 'env | sort'
-        }*/
-
-        agent {
-            label 'master'
+pipeline {
+    agent {
+        label 'master'
+    }
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+        timestamps()
+    }
+    stages {
+        stage("docker login") {
+            steps {
+                echo "====================     docker login     ======================="
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    sh "docker login -u $USERNAME -p $PASSWORD"
+                }
+            }
         }
-        options {
-            timestamps()
+        stage("Build Docker image") {
+            steps {
+                echo "==================== start building image ======================="
+                dir ('RMQ/docker/rabbitmq') {
+                    sh 'docker build -t az223/vizoro-rmq:latest . '
+                }
+            }
         }
-        stages {
-            stage('Checkout') {
-                steps {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: scm.branches,
-                        extensions: scm.extensions + [
-                            [$class: 'CleanBeforeCheckout'],
-                            [$class: 'PathRestriction', excludedRegions: '', includedRegions: '^RMQ/docker/rabbitmq/.*$']
-                        ],
-                        submoduleCfg: [],
-                        userRemoteConfigs: [
-                            [credentialsId: 'jenkins-az-with-key', url: 'git@github.com:caliber223/jenkins_test3.git']
-                        ]
-                    ])
-                }
+        stage("docker push") {
+            steps {
+                echo "==================== start pushing image  ======================="
+                sh 'docker push az223/vizoro-rmq:latest'
             }
-
-
-            /*stage('docker login') {
-                steps {
-                    echo "====================     docker login     ======================="
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-az223', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh "docker login -u $USERNAME -p $PASSWORD"
-                    }
-                }
-            } */
-
-            stage('Build') {
-                steps {
-                    echo "==================== start building image ======================="
-                    dir('RMQ/docker/rabbitmq') {
-                        sh 'make docker'
-                    }
-                }
-            }
-
-            stage('Push') {
-                steps {
-                    echo "==================== start pushing image  ======================="
-                    dir('RMQ/docker/rabbitmq') {
-                        sh 'make push'
-                        sh 'make push TAG=latest'
-                    }
-                }
-            }
-        } 
-
-    } 
+        }
+    }
+}
